@@ -1,0 +1,13 @@
+{
+  "name": "20200618_26_Node_Watermark",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "repository": "",
+  "author": "",
+  "license": "ISC",
+  "private": true,
+  "dependencies": {
+    "jimp": "0.6.4"
+  }
+}
