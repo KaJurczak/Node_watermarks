@@ -12,8 +12,13 @@ const addTextWatermarkToImage = async function(inputFile, outputFile, text) {
     alignmentY: Jimp.VERTICAL_ALIGN_MIDDLE,
   };
 
-  image.print(font, 0, 0, textData, image.getWidth(), image.getHeight());
-  await image.quality(100).writeAsync(outputFile);
+  try {
+    image.print(0, 0, textData, image.getWidth(), image.getHeight());
+    await image.quality(100).writeAsync(outputFile);
+  }
+  catch(error) {
+    console.log('Something went wrong with function... Try again! Watermark manager started again');
+  }
 };
 
 const addImageWatermarkToImage = async function(inputFile, outputFile, watermarkFile) {
@@ -22,11 +27,16 @@ const addImageWatermarkToImage = async function(inputFile, outputFile, watermark
   const x = image.getWidth() / 2 - watermark.getWidth() / 2;
   const y = image.getHeight() / 2 - watermark.getHeight() / 2;
 
-  image.composite(watermark, x, y, {
-    mode: Jimp.BLEND_SOURCE_OVER,
-    opacitySource: 0.5,
-  });
-  await image.quality(100).writeAsync(outputFile);
+  try {
+    image.composite(watermark, x, y, {
+      mode: Jimp.BLEND_SOURCE_OVER,
+      opacitySource: 0.5,
+    });
+    await image.quality(100).writeAsync(outputFile);
+  }
+  catch(error) {
+    console.log('Something went wrong with function... Try again!');
+  }
 };
 
 const prepareOutputFilename = (param) => {
@@ -67,13 +77,16 @@ const startApp = async () => {
     options.watermarkText = text.value;
 
     if (fs.existsSync('./img/' + options.inputImage)) {
-      console.log('The path exists.');
       addTextWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), options.watermarkText);
+      if (fs.existsSync('./img/' + prepareOutputFilename(options.inputImage))) {
+        console.log('Everything goes well. Check', prepareOutputFilename(options.inputImage));
+      }
     } else {
       console.log('Something went wrong... Try again');
-      process.exit();
     }
+    startApp();
   }
+
   else {
     const image = await inquirer.prompt([{
       name: 'filename',
@@ -84,12 +97,14 @@ const startApp = async () => {
     options.watermarkImage = image.filename;
 
     if (fs.existsSync('./img/' + options.inputImage) && fs.existsSync('./img/' + options.watermarkImage)) {
-      console.log('The path exists.');
       addImageWatermarkToImage('./img/' + options.inputImage, './img/' + prepareOutputFilename(options.inputImage), './img/' + options.watermarkImage);
+      if (fs.existsSync('./img/' + prepareOutputFilename(options.inputImage))) {
+        console.log('Everything goes well. Check', prepareOutputFilename(options.inputImage));
+      }
     } else {
       console.log('Something went wrong... Try again');
-      process.exit();
     }
+    startApp();
   }
 }
 
